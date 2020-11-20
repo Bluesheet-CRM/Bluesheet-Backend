@@ -11,7 +11,7 @@ var oauth2 = new jsforce.OAuth2({
   loginUrl : 'https://login.salesforce.com',
   clientId : process.env.CONSUMER_KEY,
   clientSecret : process.env.CONSUMER_SECRET,
-  redirectUri : "http://localhost:3000/auth/callback"
+  redirectUri : process.env.REDIRECT_URI
 });
 
 router.get('/auth/login', function(req, res) {
