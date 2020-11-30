@@ -15,6 +15,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "firebase-admin": "^9.4.1",
+    "googleapis": "^65.0.0",
     "jsforce": "^1.10.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-simple": "^0.5.6",
