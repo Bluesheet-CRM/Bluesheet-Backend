@@ -2,8 +2,10 @@ var dotenv = require("dotenv");
 var jsforce = require("jsforce");
 const express = require("express");
 const axios = require("axios");
-var jsforce = require('jsforce');
+var jwt = require("jsonwebtoken");
 
+var jsforce = require('jsforce');
+const salesforceUserSchema = require("../models/salesforceUser");
 const router = express.Router();
 dotenv.config();
 
@@ -19,37 +21,98 @@ router.get('/auth/login', function(req, res) {
 });
 
 
-router.get('/auth/token/:code', function(req, res) {
+router.get('/auth/token/:code',(req, res)=> {
   var conn = new jsforce.Connection({ oauth2 : oauth2 });
   var code = req.params.code;
-  console.log(code);
-  conn.authorize(code, function(err, userInfo) {
-    if (err) { return console.error(err); }
-    // Now you can get the access token, refresh token, and instance URL information.
-    // Save them to establish connection next time.
-    console.log("profile",conn)
-    console.log("access_token",conn.accessToken);
-    console.log("refresh_token",conn.
-    
-    
-    efreshToken);
-    console.log("instance url",conn.instanceUrl);
-    console.log("User ID: " + userInfo.id);
-    console.log("Org ID: " + userInfo.organizationId);
-    console.log("user info",userInfo);
-    // ...
-    res.json({
-        statusCode: 200,
-        payload:{
-            msg:"success",
-            data:{
-                url: conn.instanceUrl,
-                token: conn.accessToken
-            }
-        }
-    }) // or your desired response
-  });
-});
+  conn.authorize(code, async function(err, userInfo) {
+    if (err) { return res.send(err.message); }
 
+    const payload = {
+      access_token: conn.accessToken,
+      refresh_token: conn.refreshToken,
+      instance_url: conn.instanceUrl,
+      User_ID: userInfo.id,
+      Org_ID: userInfo.organizationId
+    }
+
+    try{
+      let result = await salesforceUserSchema.find({"User_ID": userInfo.id});
+      console.log(result);
+      if(result.length > 0){
+          result[0].access_token = conn.accessToken;
+          result[0].refresh_token = conn.refreshToken;
+
+          try{
+            const results = await result[0].save;
+            console.log(results);
+            if(results){
+              let token = await jwt.sign({
+                data: {
+                  instance_url:conn.instanceUrl,
+                  User_ID:userInfo.id
+                }
+              }, process.env.JWT_SECRET, { expiresIn: '30d' });
+      
+              res.json({
+                statusCode:200,
+                payload:{
+                  msg:"success",
+                  data:token
+                }
+              })
+            }
+          }catch(err){
+            res.json({
+              statusCode: 500,
+              payload:{
+                  msg:err.message,
+              }
+          })
+          }
+
+      }
+      else{
+        const newSchema = new salesforceUserSchema(payload);
+
+        try{
+          const result = await newSchema.save();
+          if(result){
+            let token = await jwt.sign({
+              data: {
+                instance_url:conn.instanceUrl,
+                User_ID:userInfo.id
+              }
+            }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    
+            res.json({
+              statusCode:200,
+              payload:{
+                msg:"success",
+                data:token
+              }
+            })
+          }
+        }
+        catch(err){
+          res.json({
+            statusCode: 500,
+            payload:{
+                msg:err.message,
+            }
+        })
+        }
+      }
+    }
+    catch(err){
+      res.json({
+        statusCode: 500,
+        payload:{
+            msg:err.message,
+        }
+    })
+    }
+    
+  })
+});
 
 module.exports = router;

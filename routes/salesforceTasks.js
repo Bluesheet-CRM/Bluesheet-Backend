@@ -1,8 +1,8 @@
 const express = require("express");
 var jsforce = require("jsforce");
 const router = express.Router();
-
-router.post("/allTasks", async (req, res) => {
+const checkAuth = require("../middlewares/checkAuth");
+router.post("/allTasks",[checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -22,13 +22,13 @@ router.post("/allTasks", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.get("/tasks/:id", async (req, res) => {
+  router.get("/tasks/:id",[checkAuth],  async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -48,14 +48,13 @@ router.post("/allTasks", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/getMultipleTasks", async (req, res) => {
-    console.log(req.body);
+  router.post("/getMultipleTasks",[checkAuth], async (req, res) => {
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
@@ -74,19 +73,18 @@ router.post("/allTasks", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/deleteTasks/:id", async (req, res) => {
+  router.post("/deleteTasks/:id", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
       });
-    console.log(req.params.id,req.body);
     try {
       const data = await conn.sobject("Task").destroy(req.params.id);
       res.json({
@@ -99,13 +97,13 @@ router.post("/allTasks", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/deleteMulitpleTasks", async (req, res) => {
+  router.post("/deleteMulitpleTasks", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -117,21 +115,21 @@ router.post("/allTasks", async (req, res) => {
       res.json({
         statusCode: 200,
         payload: {
-          data: data,
+          data: result,
+          msg:"success"
         },
       });
     } catch (err) {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/addTasks", async (req, res) => {
-    console.log(req.body);
+  router.post("/addTasks", [checkAuth], async  (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -152,20 +150,19 @@ router.post("/allTasks", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/updateMultipleTasks", async (req, res) => {
+  router.post("/updateMultipleTasks", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
       });
 
-    console.log(req.body);
 
     try {
       const data = await conn.sobject("Task").update(req.body.editValue);
@@ -179,7 +176,7 @@ router.post("/allTasks", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }

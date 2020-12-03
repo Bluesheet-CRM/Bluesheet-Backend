@@ -1,14 +1,13 @@
 const express = require("express");
 var jsforce = require("jsforce");
 const router = express.Router();
-
-router.post("/allOpportunities", async (req, res) => {
+const checkAuth = require("../middlewares/checkAuth");
+router.post("/allOpportunities", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
       });
-
     try {
       const data = await conn.query("SELECT Id FROM Opportunity");
       res.json({
@@ -18,17 +17,19 @@ router.post("/allOpportunities", async (req, res) => {
         },
       });
     } catch (err) {
-      console.log(err)
-      res.json({
-        statusCode: 500,
-        payload: {
-          msg: "Server Error",
-        },
-      });
+
+        res.json({
+          statusCode: 500,
+          payload: {
+            msg: err.message,
+          },
+        });
+      
+      
     }
   });
   
-  router.get("/opportunity/:id", async (req, res) => {
+  router.get("/opportunity/:id", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -48,13 +49,13 @@ router.post("/allOpportunities", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/getMultipleRecords", async (req, res) => {
+  router.post("/getMultipleRecords",[checkAuth], async (req, res) => {
     console.log(req.body);
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -74,13 +75,13 @@ router.post("/allOpportunities", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/delete/:id", async (req, res) => {
+  router.post("/delete/:id", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -99,13 +100,13 @@ router.post("/allOpportunities", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/deleteMulitple", async (req, res) => {
+  router.post("/deleteMulitple", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -117,22 +118,21 @@ router.post("/allOpportunities", async (req, res) => {
       res.json({
         statusCode: 200,
         payload: {
-          data: data,
+          data: "success",
         },
       });
     } catch (err) {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/addOpportunity", async (req, res) => {
-    console.log(req.body);
-
+  router.post("/addOpportunity", [checkAuth], async (req, res) => {
+  
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
@@ -148,24 +148,20 @@ router.post("/allOpportunities", async (req, res) => {
       });
       console.log(data);
     } catch (err) {
-      console.log(err);
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/updateMultiple", async (req, res) => {
-
+  router.post("/updateMultiple", [checkAuth], async (req, res) => {
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
       });
-
-    console.log(req.body);
 
     try {
       const data = await conn.sobject("Opportunity").update(req.body.editValue);
@@ -179,7 +175,7 @@ router.post("/allOpportunities", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }

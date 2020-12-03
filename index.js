@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const userDetails = require("./models/User");
 var jwt = require("jsonwebtoken");
-var jwt1 = require("jwt-simple");
 const Auth = require("./routes/user");
 const Pipelines = require("./routes/data");
 const Salesforce = require("./routes/salesforce");
@@ -20,6 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 app.use(Auth);
 app.use(Pipelines);
@@ -31,7 +31,7 @@ app.use(salesforceMails);
 app.use(googleMail);
 
 
-app.use(express.urlencoded({ extended: false }));
+
 
 mongoose.connect(
     process.env.ATLAS_URI,
@@ -70,5 +70,6 @@ app.post("/bluesheet/submission", async(req,res)=>{
         })
     }
 })
+
 
 app.listen(PORT, console.log(`Server is starting at ${PORT}`));

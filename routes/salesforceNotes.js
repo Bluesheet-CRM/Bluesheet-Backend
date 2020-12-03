@@ -1,8 +1,9 @@
 const express = require("express");
 var jsforce = require("jsforce");
 const router = express.Router();
+const checkAuth = require("../middlewares/checkAuth");
 
-router.post("/allNotes", async (req, res) => {
+router.post("/allNotes",[checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -22,13 +23,13 @@ router.post("/allNotes", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.get("/notes/:id", async (req, res) => {
+  router.get("/notes/:id",[checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -48,14 +49,13 @@ router.post("/allNotes", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/getMultipleNotes", async (req, res) => {
-    console.log(req.body);
+  router.post("/getMultipleNotes",[checkAuth], async (req, res) => {
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
@@ -74,19 +74,18 @@ router.post("/allNotes", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/deleteNotes/:id", async (req, res) => {
+  router.post("/deleteNotes/:id", [checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
       });
-    console.log(req.params.id,req.body);
     try {
       const data = await conn.sobject("Note").destroy(req.params.id);
       res.json({
@@ -99,13 +98,13 @@ router.post("/allNotes", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/deleteMulitpleNotes", async (req, res) => {
+  router.post("/deleteMulitpleNotes",[checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -117,21 +116,20 @@ router.post("/allNotes", async (req, res) => {
       res.json({
         statusCode: 200,
         payload: {
-          data: data,
+          data: "success",
         },
       });
     } catch (err) {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/addNotes", async (req, res) => {
-    console.log(req.body);
+  router.post("/addNotes",[checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
@@ -146,26 +144,23 @@ router.post("/allNotes", async (req, res) => {
           data: data,
         },
       });
-      console.log(data);
     } catch (err) {
-      console.log(err);
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
   });
   
-  router.post("/updateMultipleNotes", async (req, res) => {
+  router.post("/updateMultipleNotes",[checkAuth], async (req, res) => {
 
     var conn = new jsforce.Connection({
         instanceUrl : req.body.url,
         accessToken : req.body.token
       });
 
-    console.log(req.body);
 
     try {
       const data = await conn.sobject("Note").update(req.body.editValue);
@@ -179,7 +174,7 @@ router.post("/allNotes", async (req, res) => {
       res.json({
         statusCode: 500,
         payload: {
-          msg: "Server Error",
+          msg: err.message,
         },
       });
     }
