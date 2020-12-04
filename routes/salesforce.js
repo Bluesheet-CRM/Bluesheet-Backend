@@ -3,6 +3,7 @@ var jsforce = require("jsforce");
 const express = require("express");
 const axios = require("axios");
 var jwt = require("jsonwebtoken");
+const checkAuth = require("../middlewares/checkAuth");
 
 var jsforce = require('jsforce');
 const salesforceUserSchema = require("../models/salesforceUser");
@@ -115,4 +116,67 @@ router.get('/auth/token/:code',(req, res)=> {
   })
 });
 
+router.post("/auth/refresh" , [checkAuth], async(req,res)=>{
+
+  console.log(req.body.User_ID);
+  
+  try{
+    salesforceUserSchema.find({"User_ID": req.body.User_ID})
+    .then((data)=>{
+      let refreshToken = data[0].refresh_token ;
+        var conn = new jsforce.Connection({ oauth2 : oauth2 });
+        conn.oauth2.refreshToken(refreshToken, async(err, results) => {
+          if (err) return res.json({
+            statusCode:500,
+            payload:{
+              msg:"Session Failed!. Login again."
+            }
+          })
+          
+          data[0].access_token = results.access_token;
+
+          try{
+            const result = await data[0].save();
+            if(result){
+              let token = jwt.sign({  
+                data: {
+                  instance_url:result.instance_url,
+                  User_ID:result.User_ID
+                }
+              }, process.env.JWT_SECRET, { expiresIn: '30d' });
+      
+              res.json({
+                statusCode:200,
+                payload:{
+                  msg:"success",
+                  data:token
+                }
+              })
+            }
+          }
+          catch(err){
+            res.json({
+              statusCode: 500,
+              payload:{
+                  msg:err.message,
+              }
+          })
+          }
+        });
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+
+    }
+  catch(err){
+    res.json({
+      statusCode: 500,
+      payload:{
+          msg:err.message,
+      }
+  })
+  }
+
+})
 module.exports = router;
