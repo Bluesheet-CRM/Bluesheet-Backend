@@ -22,7 +22,7 @@ router.get('/auth/login', function(req, res) {
 });
 
 
-router.get('/auth/token/:code',(req, res)=> {
+router.get('/auth/token/:code', async (req, res)=> {
   var conn = new jsforce.Connection({ oauth2 : oauth2 });
   var code = req.params.code;
   conn.authorize(code, async function(err, userInfo) {
@@ -33,18 +33,19 @@ router.get('/auth/token/:code',(req, res)=> {
       refresh_token: conn.refreshToken,
       instance_url: conn.instanceUrl,
       User_ID: userInfo.id,
-      Org_ID: userInfo.organizationId
+      Org_ID: userInfo.organizationId,
+      Modified_at: Date.now()
     }
-
     try{
       let result = await salesforceUserSchema.find({"User_ID": userInfo.id});
-      console.log(result);
       if(result.length > 0){
           result[0].access_token = conn.accessToken;
           result[0].refresh_token = conn.refreshToken;
+          result[0].Modified_at = Date.now();
 
           try{
-            const results = await result[0].save;
+            const newSchema = new salesforceUserSchema(result[0]);
+            const results = await newSchema.save();
             console.log(results);
             if(results){
               let token = await jwt.sign({
@@ -126,12 +127,15 @@ router.post("/auth/refresh" , [checkAuth], async(req,res)=>{
       let refreshToken = data[0].refresh_token ;
         var conn = new jsforce.Connection({ oauth2 : oauth2 });
         conn.oauth2.refreshToken(refreshToken, async(err, results) => {
-          if (err) return res.json({
+          if (err) {
+            console.log(err);
+            return res.json({
             statusCode:500,
             payload:{
-              msg:"Session Failed!. Login again."
+              msg:" Salesforce Session Validity Expired!. Login again."
             }
           })
+        }
           
           data[0].access_token = results.access_token;
 

@@ -25,6 +25,15 @@ const salesforceUserSchema = mongoose.Schema({
         type: String,
         required: true,
         trim:true
+      },
+      Created_at:{
+        type: Date,
+        required: true,
+        default: Date.now()
+      },
+      Modified_at:{
+        type:Date,
+        required: true
       }
 })
 

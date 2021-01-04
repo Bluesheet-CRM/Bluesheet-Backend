@@ -56,7 +56,8 @@ module.exports.getOpportunities = (uid) => {
 
 module.exports.addOpportunities = async(uid, data) => {
   if (data.length === 1) {
-    if (data[0].Id !== null) {
+    console.log(data[0].Id);
+    if (data[0].Id !== null && data[0].Id !== undefined) {
       return new Promise((resolve, reject) => {
         userDb
           .doc(uid)
@@ -70,6 +71,7 @@ module.exports.addOpportunities = async(uid, data) => {
       });
     } else {
       return new Promise((resolve, reject) => {
+        
         userDb
           .doc(uid)
           .collection("opportunites")
