@@ -37,10 +37,3 @@ const oauth2Client = new google.auth.OAuth2(
 module.exports = router;
 
 
-// {
-//     access_token: 'ya29.a0AfH6SMCrKSym1LoCUbO-YMPNdm5-3f8WgFFXMZY9U2dbrgAKJhS0qUXxtQaQ63ESXVjn_asc_3KXxCBTS57a8K6gQfnfBthzEkTPEzi3H_f8soKKoz0GHrUIp8UI6Fu9qbv1WECCLmJjgCFrByBBVJc8dB6BnenGfIPHYtXR_w0',
-//     refresh_token: '1//0gkg6MEWMO7aYCgYIARAAGBASNwF-L9IrORjobcwrwWroD-2E7wUtdc3u72pL1udtWMMWhOIae4qtbc2kw6uhdVlR8KGPrQIYnbs',
-//     scope: 'https://www.googleapis.com/auth/gmail.readonly',
-//     token_type: 'Bearer',
-//     expiry_date: 1606463103727
-//   }

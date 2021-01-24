@@ -5,7 +5,7 @@ var serviceAccount = require("../serviceAccountKey.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://bluesheet-development.firebaseio.com"
+  databaseURL: "<Database URL>"
 });
 
 module.exports = admin;
